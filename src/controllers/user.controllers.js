@@ -1,5 +1,6 @@
 import { asyncHandler } from '../utils/asyncHandler.js'
 import {ApiError} from '../utils/ApiError.js'
+import {User} from '../models/user.model.js'
 const registerUser=asyncHandler(async (req,res) => {
     // get user detail from frontend
     const {fullname,email,username,password } =req.body
@@ -32,6 +33,21 @@ const registerUser=asyncHandler(async (req,res) => {
         
 
     }
+    const existedUser=User.findOne(
+        {
+            $or:[{email},{username}]
+        }
+    )
+    if(existedUser){
+        throw new ApiError(409, "User with email or user already existed")
+    }
+    const avtarLocalPath=req.files?.avatar[0]?.path
+    const coverImageLocalPath=req.files?.coverImage[0]?.path
+    if (!avtarLocalPath) {
+        throw new
+        
+    }
+     
     
     
     
