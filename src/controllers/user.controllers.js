@@ -4,6 +4,7 @@ import {User} from '../models/user.model.js'
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from '../utils/ApiResponce.js'
 import jwt from 'jsonwebtoken'
+import { json } from 'express'
 const generateAcsessAndRefreshToken=async (userId) => {
     try {
        const user= await User.findOne(userId)
@@ -231,11 +232,37 @@ const updateAccountDetail=asyncHandler(async (req,res)=>{
     return res.status(200).json(new ApiResponse(200,user,"account update sucsessfully"))
 })
 
+const updateUserAvatar=asyncHandler(async(req,res)=>{
+    const avatarLocalPath=req.file?.path
+    if (!avatarLocalPath) {
+        throw new ApiError(400,"file is missing")
+        
+    }
+    const avatar=await uploadOnCloudinary(avatarLocalPath)
+    if (!avatar.url) {
+    throw new ApiError(400,"error while uploading on avatar")
+    }
+    const user=await User.findByIdAndUpdate(req.user?._id,{
+    $set:{
+        avatar:avatar.url
+    }
+    },{new:true}).select("-password")
+    return res.status(200,json(200,user,"avatar update"))
+
+})
+
+
+
+
     
 export {
     registerUser,
     loginUser,
     logoutUser,
-    refreshAcsessToken
+    refreshAcsessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetail,
+    updateUserAvatar,
 
 }
